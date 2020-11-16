@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/parnurzeal/gorequest"
+	"github.com/sirupsen/logrus"
 
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -15,9 +16,14 @@ import (
 var sendMessageURL string
 
 func init() {
-	token := os.Getenv("TOKEN")
+	logrus.SetFormatter(&logrus.TextFormatter{})
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.WarnLevel)
+	logrus.SetReportCaller(true)
 
-	if len(token) > 0 {
+	token := os.Getenv("TOKEN")
+	if len(token) < 1 {
+		logrus.Warning("No token set.")
 		sendMessageURL = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
 	}
 }
@@ -43,6 +49,7 @@ func sendMessage(text string) {
 	chatID := os.Getenv("CHAT_ID")
 
 	if sendMessageURL == "" || len(chatID) < 1 {
+		logrus.Warning("No chat id set.")
 		return
 	}
 
