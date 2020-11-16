@@ -13,7 +13,10 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var sendMessageURL string
+var (
+	sendMessageURL string
+	chatID         string
+)
 
 func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{})
@@ -25,6 +28,12 @@ func init() {
 	if len(token) < 1 {
 		logrus.Warning("No token set.")
 		sendMessageURL = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
+	}
+
+	chatID = os.Getenv("CHAT_ID")
+	if len(chatID) < 1 {
+		logrus.Warning("No chat id set.")
+		return
 	}
 }
 
@@ -46,13 +55,6 @@ func informerHandler(c *gin.Context) {
 }
 
 func sendMessage(text string) {
-	chatID := os.Getenv("CHAT_ID")
-
-	if sendMessageURL == "" || len(chatID) < 1 {
-		logrus.Warning("No chat id set.")
-		return
-	}
-
 	gorequest.New().Get(sendMessageURL).
 		Param("chat_id", chatID).
 		Param("parse_mode", "MarkdownV2").
