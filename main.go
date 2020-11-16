@@ -64,7 +64,7 @@ func sendMessage(text string) {
 		Param("text", "```\n"+text+"\n```").
 		End()
 
-	for err := range errs {
+	for _, err := range errs {
 		logrus.Error(err)
 	}
 }
