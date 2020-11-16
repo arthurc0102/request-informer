@@ -21,20 +21,22 @@ var (
 func init() {
 	logrus.SetFormatter(&logrus.TextFormatter{})
 	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.WarnLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 	logrus.SetReportCaller(true)
 
 	token := os.Getenv("TOKEN")
 	if len(token) > 0 {
 		sendMessageURL = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
+		logrus.Info("Send message url set: " + sendMessageURL)
 	} else {
 		logrus.Warning("No token set.")
 	}
 
 	chatID = os.Getenv("CHAT_ID")
-	if len(chatID) < 1 {
+	if len(chatID) > 0 {
+		logrus.Info("Chat id set to " + chatID)
+	} else {
 		logrus.Warning("No chat id set.")
-		return
 	}
 }
 
@@ -56,9 +58,13 @@ func informerHandler(c *gin.Context) {
 }
 
 func sendMessage(text string) {
-	gorequest.New().Get(sendMessageURL).
+	_, _, errs := gorequest.New().Get(sendMessageURL).
 		Param("chat_id", chatID).
 		Param("parse_mode", "MarkdownV2").
 		Param("text", "```\n"+text+"\n```").
 		End()
+
+	for err := range errs {
+		logrus.Error(err)
+	}
 }
