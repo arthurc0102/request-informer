@@ -25,9 +25,10 @@ func init() {
 	logrus.SetReportCaller(true)
 
 	token := os.Getenv("TOKEN")
-	if len(token) < 1 {
-		logrus.Warning("No token set.")
+	if len(token) > 0 {
 		sendMessageURL = fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
+	} else {
+		logrus.Warning("No token set.")
 	}
 
 	chatID = os.Getenv("CHAT_ID")
